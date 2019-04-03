@@ -167,12 +167,6 @@ public interface PascaletVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitFunctionDeclaration(PascaletParser.FunctionDeclarationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link PascaletParser#identifierList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitIdentifierList(PascaletParser.IdentifierListContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PascaletParser#resultType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

@@ -268,16 +268,6 @@ public interface PascaletListener extends ParseTreeListener {
 	 */
 	void exitFunctionDeclaration(PascaletParser.FunctionDeclarationContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PascaletParser#identifierList}.
-	 * @param ctx the parse tree
-	 */
-	void enterIdentifierList(PascaletParser.IdentifierListContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PascaletParser#identifierList}.
-	 * @param ctx the parse tree
-	 */
-	void exitIdentifierList(PascaletParser.IdentifierListContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link PascaletParser#resultType}.
 	 * @param ctx the parse tree
 	 */

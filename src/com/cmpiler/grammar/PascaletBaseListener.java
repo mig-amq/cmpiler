@@ -328,18 +328,6 @@ public class PascaletBaseListener implements PascaletListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterIdentifierList(PascaletParser.IdentifierListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitIdentifierList(PascaletParser.IdentifierListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterResultType(PascaletParser.ResultTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}

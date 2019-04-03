@@ -73,8 +73,7 @@ varDefBlock
     ;
 
 varDef
-    :   identifier COLON type
-    | identifierList COLON type
+    :   identifier (COMMA identifier)* COLON type
     ;
 
 variable
@@ -107,15 +106,11 @@ formalParameterList
     ;
 
 parameterGroup
-    :   identifierList COLON type
+    :   identifier (COMMA identifier)* COLON type
     ;
 
 functionDeclaration
     :   FUNCTION identifier (formalParameterList)? COLON resultType SEMI block
-    ;
-
-identifierList
-    :   identifier (COMMA identifier)*
     ;
 
 resultType
