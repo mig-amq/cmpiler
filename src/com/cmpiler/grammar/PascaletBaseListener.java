@@ -220,13 +220,25 @@ public class PascaletBaseListener implements PascaletListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterVariable(PascaletParser.VariableContext ctx) { }
+	@Override public void enterRegularVar(PascaletParser.RegularVarContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitVariable(PascaletParser.VariableContext ctx) { }
+	@Override public void exitRegularVar(PascaletParser.RegularVarContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayVar(PascaletParser.ArrayVarContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayVar(PascaletParser.ArrayVarContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -335,6 +347,18 @@ public class PascaletBaseListener implements PascaletListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitResultType(PascaletParser.ResultTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterArrayType(PascaletParser.ArrayTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitArrayType(PascaletParser.ArrayTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

@@ -120,6 +120,7 @@ public class Scope {
         throw new RuntimeException("Error: Variable was not declared");
     }
 
+
     /**
      * Case-insensitive search for a variable Value within the current Scope or its parent
      * @param variable - String, name of the variable to look for
@@ -202,5 +203,32 @@ public class Scope {
 
     public void setParent(Scope parent) {
         this.parent = parent;
+    }
+
+    public void dumpVariables() {
+        for(Map.Entry<String, Value> entry : this.variables.entrySet()) {
+            System.out.print(entry.getKey() + " = ");
+            switch (entry.getValue().getType()) {
+                case INT:
+                    System.out.println(entry.getValue().asInt());
+                    break;
+                case REAL:
+                    System.out.println(entry.getValue().asReal());
+                    break;
+                case BOOL:
+                    System.out.println(entry.getValue().asBool());
+                    break;
+                case STRING:
+                case CHAR:
+                    System.out.println(entry.getValue().asString());
+                    break;
+                case ARRAY:
+                    for (int i = 0; i < entry.getValue().asArray().size(); i++)
+                        System.out.println(entry.getValue().asArray().get(i));
+                    break;
+                default:
+                    System.out.println("NULL");
+            }
+        }
     }
 }

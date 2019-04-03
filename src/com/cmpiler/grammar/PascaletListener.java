@@ -178,15 +178,29 @@ public interface PascaletListener extends ParseTreeListener {
 	 */
 	void exitVarDef(PascaletParser.VarDefContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PascaletParser#variable}.
+	 * Enter a parse tree produced by the {@code regularVar}
+	 * labeled alternative in {@link PascaletParser#variable}.
 	 * @param ctx the parse tree
 	 */
-	void enterVariable(PascaletParser.VariableContext ctx);
+	void enterRegularVar(PascaletParser.RegularVarContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link PascaletParser#variable}.
+	 * Exit a parse tree produced by the {@code regularVar}
+	 * labeled alternative in {@link PascaletParser#variable}.
 	 * @param ctx the parse tree
 	 */
-	void exitVariable(PascaletParser.VariableContext ctx);
+	void exitRegularVar(PascaletParser.RegularVarContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code arrayVar}
+	 * labeled alternative in {@link PascaletParser#variable}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayVar(PascaletParser.ArrayVarContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code arrayVar}
+	 * labeled alternative in {@link PascaletParser#variable}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayVar(PascaletParser.ArrayVarContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PascaletParser#constDefBlock}.
 	 * @param ctx the parse tree
@@ -277,6 +291,16 @@ public interface PascaletListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitResultType(PascaletParser.ResultTypeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascaletParser#arrayType}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayType(PascaletParser.ArrayTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascaletParser#arrayType}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayType(PascaletParser.ArrayTypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PascaletParser#type}.
 	 * @param ctx the parse tree

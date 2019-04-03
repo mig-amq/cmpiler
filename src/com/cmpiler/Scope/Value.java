@@ -1,8 +1,10 @@
 package com.cmpiler.Scope;
 
+import java.util.ArrayList;
+
 public class Value {
     public enum Type {
-        INT, REAL, STRING, BOOL, NULL, CHAR
+        INT, REAL, STRING, BOOL, NULL, CHAR, ARRAY
     }
 
     private int valInt = 0;
@@ -10,7 +12,11 @@ public class Value {
     private char valChar = '\0';
     private double valDouble = 0.0;
     private boolean valBool = false;
+    private ArrayList<Integer> valArray = new ArrayList<>();
+    private int startIDX = 0, endIDX = 0;
     private Type type = Type.NULL;
+
+    public final static Value NULL = new Value(Type.NULL);
 
     public Value(){}
     public Value(Type type) {
@@ -29,9 +35,23 @@ public class Value {
                 return valBool;
             case CHAR:
                 return valChar;
+            case ARRAY:
+                return valArray;
             default:
                 return null;
         }
+    }
+
+    public int getArrayValue (int index) {
+        if (this.type == Type.ARRAY) {
+            if (index >= startIDX && index <= startIDX) {
+                return valArray.get(index);
+            } else {
+                throw new RuntimeException("Error: Invalid array index");
+            }
+        }
+
+        throw new RuntimeException("Error: Variable is not an array");
     }
 
     /**
@@ -90,6 +110,27 @@ public class Value {
     }
 
     /**
+     * Similar to {@link #setValue(int)}, except this method handles arrays
+     * @param x - the boolean value
+     * @return the parameter value
+     */
+    public ArrayList<Integer> setValue (ArrayList<Integer> x, int startIDX, int endIDX) {
+        if (startIDX >= 1 && endIDX >= startIDX) {
+            this.valArray = x;
+            this.type = Type.ARRAY;
+            this.startIDX = startIDX;
+            this.endIDX = endIDX;
+
+            for (int i = startIDX; i <= endIDX; i++)
+                this.valArray.add(0);
+
+            return this.valArray;
+        }
+
+        throw new RuntimeException("Error: Start and end index must be greater than 1");
+    }
+
+    /**
      * Creates a {@link Value} object, with the proper Type and value based on the parameter
      * given.
      * @param val - the parameter to place in new {@link Value} object
@@ -145,6 +186,76 @@ public class Value {
         return v;
     }
 
+    /**
+     * Similar to {@link #of(String)}, except for arrays
+     * @param val - the parameter to place in new {@link Value} object
+     * @return a Value object
+     */
+    public static Value of (ArrayList<Integer> val, int startIDX, int endIDX) {
+        Value v = new Value(Type.BOOL);
+        v.setValue(val, startIDX, endIDX);
+        return v;
+    }
+
+    public static Value of (Type type, String str) {
+        try {
+            switch (type) {
+                case INT:
+                    return Value.of(Integer.parseInt(str));
+                case REAL:
+                    return Value.of(Double.parseDouble(str));
+                case BOOL:
+                    return Value.of(Boolean.parseBoolean(str));
+                default:
+                    return Value.of(str);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error: Value invalid");
+        } finally {
+            return Value.NULL;
+        }
+    }
+
+    public int asInt() {
+        if (type == Type.INT)
+            return valInt;
+        else if (type == Type.REAL)
+            return (int) valDouble;
+
+        throw new RuntimeException("Error: Type invalid");
+    }
+
+    public String asString() {
+        if (type == Type.STRING)
+            return valString;
+        else if (type == Type.CHAR)
+            return String.valueOf(valChar);
+
+        throw new RuntimeException("Error: Type invalid");
+    }
+
+    public double asReal() {
+        if (type == Type.REAL)
+            return valDouble;
+        else if (type == Type.INT)
+            return valInt;
+
+        throw new RuntimeException("Error: Type invalid");
+    }
+
+    public boolean asBool() {
+        if (type == Type.BOOL)
+            return valBool;
+
+        throw new RuntimeException("Error: Type invalid");
+    }
+
+    public ArrayList<Integer> asArray() {
+        if (type == Type.ARRAY)
+            return valArray;
+
+        throw new RuntimeException("Error: Type invalid");
+    }
     /**
      * Gets the type of this object, see {@link Value.Type}
      * @return the objects {@link Value.Type}

@@ -77,7 +77,8 @@ varDef
     ;
 
 variable
-    :   IDENT
+    :   IDENT #regularVar
+    |   IDENT LBRACK constant RBRACK #arrayVar
     ;
 
 constDefBlock
@@ -117,8 +118,13 @@ resultType
     :   type
     ;
 
+arrayType
+    :   ARRAY LBRACK constant DOTDOT constant RBRACK OF type
+    ;
+
 type
     :   (CHARACTER | BOOLEAN | INTEGER | STRING | REAL)
+    |   arrayType
     ;
 
 multiplicativeoperator
@@ -238,6 +244,9 @@ END
 IF
     :   I F
     ;
+OF
+    :   O F
+    ;
 THEN
     :   T H E N
     ;
@@ -280,6 +289,9 @@ BOOL
     ;
 INTEGER
     :   I N T E G E R
+    ;
+ARRAY
+    :   A R R A Y
     ;
 STRING
     :   S T R I N G
@@ -359,11 +371,26 @@ COLON
 DOT
     :   '.'
     ;
+DOTDOT
+    :   '..'
+    ;
 LPAREN
     :   '('
     ;
 RPAREN
     :   ')'
+    ;
+LBRACK
+    :   '['
+    ;
+RBRACK
+    :   ']'
+    ;
+LBRACK2
+    :   '(.'
+    ;
+RBRACK2
+    :   '.)'
     ;
 fragment EXPONENT
     :   ('e') ('+' | '-')? ('0' .. '9')
