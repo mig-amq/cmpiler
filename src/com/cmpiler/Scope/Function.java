@@ -2,6 +2,9 @@ package com.cmpiler.Scope;
 
 import com.cmpiler.grammar.PascaletParser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * When creating a function, their scope should always have an initial variable
  * of the same name, i.e. if the name of the variable is funcName(), there should be
@@ -30,7 +33,7 @@ public class Function {
      * Invokes a function, e.g. it executes the instructions inside the Block context
      * @return the return value of the function
      */
-    public Value invoke() {
+    public Value invoke(ArrayList<Value> parameterValues) {
         // Add code here...
 
         return scope.findVariable(name).getValue();

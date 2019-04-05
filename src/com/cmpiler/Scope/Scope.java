@@ -2,6 +2,8 @@ package com.cmpiler.Scope;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Scope {
     private HashMap<String, Value> variables;
@@ -45,11 +47,29 @@ public class Scope {
         if (var != null) {
             if (var.getValue().getType() == Value.Type.STRING)
                 var.getValue().setValue(x);
-            else
+            else if (var.getValue().getType() == Value.Type.REAL && x.contains("."))
+                try {
+                    var.getValue().setValue(Double.parseDouble(x));
+                } catch (Exception e) {
+                    throw new RuntimeException("Error Type mismatch");
+                }
+            else if (var.getValue().getType() == Value.Type.INT)
+                try {
+                    var.getValue().setValue(Integer.parseInt(x));
+                } catch (Exception e) {
+                    throw new RuntimeException("Error Type mismatch");
+                }
+            else if (var.getValue().getType() == Value.Type.BOOL) {
+                try {
+                    var.getValue().setValue(Boolean.parseBoolean(x));
+                } catch (Exception e) {
+                    throw new RuntimeException("Error Type mismatch");
+                }
+            } else
                 throw new RuntimeException("Error: Type mismatch");
+        } else {
+            throw new RuntimeException("Error: Variable was not declared");
         }
-
-        throw new RuntimeException("Error: Variable was not declared");
     }
 
     /**
@@ -64,11 +84,25 @@ public class Scope {
                 var.getValue().setValue(x);
             else
                 throw new RuntimeException("Error: Type mismatch");
+        } else {
+            throw new RuntimeException("Error: Variable was not declared");
         }
-
-        throw new RuntimeException("Error: Variable was not declared");
     }
 
+    public void assignValue (String variable, int index, int x) {
+        Map.Entry<String, Value> var = findVariable(variable);
+        if (var != null) {
+            if (var.getValue().getType() == Value.Type.ARRAY)
+                if (index >= var.getValue().getStartIDX() && index <= var.getValue().getEndIDX())
+                    var.getValue().asArray().set(index - 1, Value.of(x));
+                else
+                    throw new RuntimeException("Error: Index out of bounds");
+            else
+                throw new RuntimeException("Error: Type mismatch");
+        } else {
+            throw new RuntimeException("Error: Variable was not declared");
+        }
+    }
     /**
      * Similar to {@link #assignValue(String, String)}, except for booleans
      * @param variable - String, the variable name
@@ -81,9 +115,9 @@ public class Scope {
                 var.getValue().setValue(x);
             else
                 throw new RuntimeException("Error: Type mismatch");
+        } else {
+            throw new RuntimeException("Error: Variable was not declared");
         }
-
-        throw new RuntimeException("Error: Variable was not declared");
     }
 
     /**
@@ -98,9 +132,9 @@ public class Scope {
                 var.getValue().setValue(x);
             else
                 throw new RuntimeException("Error: Type mismatch");
+        } else {
+            throw new RuntimeException("Error: Variable was not declared");
         }
-
-        throw new RuntimeException("Error: Variable was not declared");
     }
 
     /**
@@ -115,11 +149,10 @@ public class Scope {
                 var.getValue().setValue(x);
             else
                 throw new RuntimeException("Error: Type mismatch");
+        } else {
+            throw new RuntimeException("Error: Variable was not declared");
         }
-
-        throw new RuntimeException("Error: Variable was not declared");
     }
-
 
     /**
      * Case-insensitive search for a variable Value within the current Scope or its parent

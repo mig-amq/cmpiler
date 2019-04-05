@@ -2,6 +2,8 @@ package com.cmpiler.Scope;
 
 import com.cmpiler.grammar.PascaletParser;
 
+import java.util.ArrayList;
+
 /**
  * Similar to the {@link Function} class, except a Procedure does not need
  * to return a variable, it only executes functions
@@ -27,7 +29,7 @@ public class Procedure {
     /**
      * Invokes a procedure, e.g. it executes the instructions inside the Block statementContext
      */
-    public void invoke() {
+    public void invoke(ArrayList<Value> parameterValues) {
         // Add code here...
     }
 

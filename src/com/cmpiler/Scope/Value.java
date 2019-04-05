@@ -3,17 +3,19 @@ package com.cmpiler.Scope;
 import java.util.ArrayList;
 
 public class Value {
+
     public enum Type {
         INT, REAL, STRING, BOOL, NULL, CHAR, ARRAY
     }
 
-    private int valInt = 0;
-    private String valString = "";
-    private char valChar = '\0';
-    private double valDouble = 0.0;
-    private boolean valBool = false;
-    private ArrayList<Integer> valArray = new ArrayList<>();
-    private int startIDX = 0, endIDX = 0;
+    public String name = "";
+    public int valInt = 0;
+    public String valString = "";
+    public char valChar = '\0';
+    public double valDouble = 0.0;
+    public boolean valBool = false;
+    public ArrayList<Value> valArray = new ArrayList<>();
+    public int startIDX = 0, endIDX = 0;
     private Type type = Type.NULL;
 
     public final static Value NULL = new Value(Type.NULL);
@@ -21,6 +23,30 @@ public class Value {
     public Value(){}
     public Value(Type type) {
         this.type = type;
+    }
+    public Value(Value v) {
+        switch(v.type) {
+            case INT:
+                this.setValue(v.valInt);
+                break;
+            case STRING:
+                this.setValue(v.valString);
+                break;
+            case REAL:
+                this.setValue(v.valDouble);
+                break;
+            case BOOL:
+                this.setValue(v.valBool);
+                break;
+            case CHAR:
+                this.setValue(v.valChar);
+                break;
+            case ARRAY:
+                this.setValue(v.valArray, v.startIDX, v.endIDX);
+                break;
+            default:
+                this.setType(Type.NULL);
+        }
     }
 
     public Object getValue() {
@@ -40,18 +66,6 @@ public class Value {
             default:
                 return null;
         }
-    }
-
-    public int getArrayValue (int index) {
-        if (this.type == Type.ARRAY) {
-            if (index >= startIDX && index <= startIDX) {
-                return valArray.get(index);
-            } else {
-                throw new RuntimeException("Error: Invalid array index");
-            }
-        }
-
-        throw new RuntimeException("Error: Variable is not an array");
     }
 
     /**
@@ -111,10 +125,10 @@ public class Value {
 
     /**
      * Similar to {@link #setValue(int)}, except this method handles arrays
-     * @param x - the boolean value
+     * @param x - the array value
      * @return the parameter value
      */
-    public ArrayList<Integer> setValue (ArrayList<Integer> x, int startIDX, int endIDX) {
+    public ArrayList<Value> setValue (ArrayList<Value> x, int startIDX, int endIDX) {
         if (startIDX >= 1 && endIDX >= startIDX) {
             this.valArray = x;
             this.type = Type.ARRAY;
@@ -122,7 +136,7 @@ public class Value {
             this.endIDX = endIDX;
 
             for (int i = startIDX; i <= endIDX; i++)
-                this.valArray.add(0);
+                this.valArray.add(Value.of(0));
 
             return this.valArray;
         }
@@ -191,31 +205,17 @@ public class Value {
      * @param val - the parameter to place in new {@link Value} object
      * @return a Value object
      */
-    public static Value of (ArrayList<Integer> val, int startIDX, int endIDX) {
+    public static Value of (ArrayList<Value> val, int startIDX, int endIDX) {
         Value v = new Value(Type.BOOL);
         v.setValue(val, startIDX, endIDX);
         return v;
     }
 
-    public static Value of (Type type, String str) {
-        try {
-            switch (type) {
-                case INT:
-                    return Value.of(Integer.parseInt(str));
-                case REAL:
-                    return Value.of(Double.parseDouble(str));
-                case BOOL:
-                    return Value.of(Boolean.parseBoolean(str));
-                default:
-                    return Value.of(str);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Error: Value invalid");
-        } finally {
-            return Value.NULL;
-        }
-    }
-
+    /**
+     * Returns the Value object as an integer
+     * @exception RuntimeException if the variable cannot be converted into the requested data type
+     * @return the requested value
+     */
     public int asInt() {
         if (type == Type.INT)
             return valInt;
@@ -225,6 +225,11 @@ public class Value {
         throw new RuntimeException("Error: Type invalid");
     }
 
+    /**
+     * Similar to {@link #asInt()}, except for Strings
+     * @exception RuntimeException if the variable cannot be converted into the requested data type
+     * @return the requested value
+     */
     public String asString() {
         if (type == Type.STRING)
             return valString;
@@ -234,6 +239,11 @@ public class Value {
         throw new RuntimeException("Error: Type invalid");
     }
 
+    /**
+     * Similar to {@link #asInt()}, except for doubles
+     * @exception RuntimeException if the variable cannot be converted into the requested data type
+     * @return the requested value
+     */
     public double asReal() {
         if (type == Type.REAL)
             return valDouble;
@@ -243,6 +253,11 @@ public class Value {
         throw new RuntimeException("Error: Type invalid");
     }
 
+    /**
+     * Similar to {@link #asInt()}, except for booleans
+     * @exception RuntimeException if the variable cannot be converted into the requested data type
+     * @return the requested value
+     */
     public boolean asBool() {
         if (type == Type.BOOL)
             return valBool;
@@ -250,26 +265,284 @@ public class Value {
         throw new RuntimeException("Error: Type invalid");
     }
 
-    public ArrayList<Integer> asArray() {
+    /**
+     * Similar to {@link #asInt()}, except for arrays
+     * @exception RuntimeException if the variable cannot be converted into the requested data type
+     * @return the requested value
+     */
+    public ArrayList<Value> asArray() {
         if (type == Type.ARRAY)
             return valArray;
 
         throw new RuntimeException("Error: Type invalid");
     }
+
     /**
-     * Gets the type of this object, see {@link Value.Type}
-     * @return the objects {@link Value.Type}
+     * Similar to {@link #asInt()}, except for characters
+     * @exception RuntimeException if the variable cannot be converted into the requested data type
+     * @return the requested value
      */
+    public char asChar() {
+        if (type == Type.CHAR)
+            return valChar;
+
+        throw new RuntimeException("Error: Type invalid");
+    }
+
+    /**
+     * Checks if this Value object is an integer
+     * @return a boolean value
+     */
+    public boolean isInt() { return this.type == Type.INT; }
+
+    /**
+     * Checks if this Value object is a double/real
+     * @return a boolean value
+     */
+    public boolean isReal() { return this.type == Type.REAL; }
+
+    /**
+     * Checks if this Value object is a number
+     * @return a boolean value
+     */
+    public boolean isNumeric() { return this.isInt() || this.isReal(); }
+
+    /**
+     * Checks if this Value object is a string
+     * @return a boolean value
+     */
+    public boolean isString() { return this.type == Type.STRING; }
+
+    /**
+     * Checks if this Value object is a character
+     * @return a boolean value
+     */
+    public boolean isChar() { return this.type == Type.CHAR; }
+
+    /**
+     * Checks if this Value object is an easily printable object
+     * @return a boolean value
+     */
+    public boolean isPrint() { return !this.isArray(); }
+
+    /**
+     * Checks if this Value object is an array
+     * @return a boolean value
+     */
+    public boolean isArray() { return this.type == Type.ARRAY; }
+
+    /**
+     * Checks if this Value object is null
+     * @return a boolean value
+     */
+    public boolean isNull() { return this.type == Type.NULL; }
+
+    /**
+     * Checks if this Value object is a boolean
+     * @return a boolean value
+     */
+    public boolean isBool() { return this.type == Type.BOOL; }
+
+    /**
+     * Compares two Value objects with each other
+     * @param v - the Value object that will be compared to
+     * @return  0 - the two Value objects are equal in type and data
+     *          > 0 - the second Value object is lesser than the current one
+     *          < 0 - the second Value object is greater than the current one
+     */
+    public int compare(Value v) {
+        if (v.isInt() && this.isInt()) {
+            return this.asInt() - v.asInt();
+        } else if (v.isString() && this.isString()) {
+            return this.asString().compareTo(v.asString());
+        } else if (v.isReal() && this.isReal()) {
+            return (int) (this.asReal() - v.asReal());
+        } else if (v.isChar() && this.isChar()) {
+            return this.asChar() - v.asChar();
+        } else if (v.isBool() && this.isBool()) {
+            return (v.isBool() == this.isBool()) ? 0 : 1;
+        } else if (v.isArray() && this.isArray()) {
+            if (this.asArray().size() > v.asArray().size())
+                return 1;
+            else if (this.asArray().size() < v.asArray().size())
+                return -1;
+            else {
+                for (int i = 0; i < this.asArray().size(); i++)
+                    if (this.asArray().get(i) != v.asArray().get(i)) return 1;
+
+                return 0;
+            }
+        }
+
+        throw new RuntimeException("Error: Incompatible types: got " + v.getType() + " expected " + this.getType());
+    }
+
+    /**
+     * Performs addition between the current instance and the parameters
+     * @exception RuntimeException - if the either of the objects are incapable of being added
+     * @param v the Value object that will be modded to this instance
+     * @return a Value that contains an integer or real
+     */
+    public Value plus (Value v) {
+        if (this.isReal() && v.isInt()) {
+            return Value.of((this.asReal() + v.asReal()));
+        } else if (this.isInt() && v.isReal()) {
+            return Value.of(this.asInt() + this.asReal());
+        } else if (this.isReal() && v.isReal()) {
+            return Value.of(this.asReal() + v.asReal());
+        } else if (this.isInt() && v.isInt()) {
+            return Value.of(this.asInt() + v.asInt());
+        } else if (this.isString()) {
+            return Value.of(this.asString() + v.toString());
+        } else if (v.isString()) {
+            return Value.of(this.toString() + v.asString());
+        }
+
+        throw new RuntimeException("Error: Operator is not overloaded: " + this.getType() + " + " + v.getType());
+    }
+
+    /**
+     * Performs subtraction between the current instance and the parameters
+     * @exception RuntimeException - if the either of the objects are incapable of being subtracted
+     * @param v the Value object that will be modded to this instance
+     * @return a Value that contains an integer or real
+     */
+    public Value minus (Value v) {
+        if (this.isReal() && v.isInt()) {
+            return Value.of((this.asReal() + v.asReal()));
+        } else if (this.isInt() && v.isReal()) {
+            return Value.of(this.asInt() + this.asReal());
+        } else if (this.isReal() && v.isReal()) {
+            return Value.of(this.asReal() + v.asReal());
+        } else if (this.isInt() && v.isInt()) {
+            return Value.of(this.asInt() + v.asInt());
+        }
+
+        throw new RuntimeException("Error: Operator is not overloaded: " + this.getType() + " + " + v.getType());
+    }
+
+    /**
+     * Performs logical OR between the current instance and the parameter
+     * @exception RuntimeException - if the either of the objects are incapable of being or-ed
+     * @param v - the Value object that will be or-ed to this instance
+     * @return a Value that contains a boolean
+     */
+    public Value or (Value v) {
+        if (this.isBool() && v.isBool()) {
+            return Value.of(this.asBool() || v.asBool());
+        }
+
+        throw new RuntimeException("Error: Operator is not overloaded: " + this.getType() + " + " + v.getType());
+    }
+
+    /**
+     * Performs multiplication between the current instance and the parameters
+     * @exception RuntimeException - if the either of the objects are incapable of being multiplied
+     * @param v the Value object that will be modded to this instance
+     * @return a Value that contains an integer or real
+     */
+    public Value mult (Value v) {
+        if (this.isReal() && v.isInt()) {
+            return Value.of((this.asReal() * v.asReal()));
+        } else if (this.isInt() && v.isReal()) {
+            return Value.of(this.asInt() * this.asReal());
+        } else if (this.isReal() && v.isReal()) {
+            return Value.of(this.asReal() * v.asReal());
+        } else if (this.isInt() && v.isInt()) {
+            return Value.of(this.asInt() * v.asInt());
+        }
+
+        throw new RuntimeException("Error: Operator is not overloaded: " + this.getType() + " + " + v.getType());
+    }
+
+    /**
+     * Performs division between the current instance and the parameters
+     * @exception RuntimeException - if the either of the objects are incapable of being divided or if the parameter contains
+     * the integer value 0
+     * @param v the Value object that will be modded to this instance
+     * @return a Value that contains an integer or real
+     */
+    public Value div (Value v) {
+        if (v.isInt() && v.asInt() == 0)
+            throw new RuntimeException("Error: Division by zero occurred.");
+
+        if (this.isReal() && v.isInt()) {
+            return Value.of((this.asReal() / v.asReal()));
+        } else if (this.isInt() && v.isReal()) {
+            return Value.of(this.asInt() / this.asReal());
+        } else if (this.isReal() && v.isReal()) {
+            return Value.of(this.asReal() / v.asReal());
+        } else if (this.isInt() && v.isInt()) {
+            return Value.of(this.asInt() / v.asInt());
+        }
+
+        throw new RuntimeException("Error: Operator is not overloaded: " + this.getType() + " + " + v.getType());
+    }
+
+    /**
+     * Performs modulo between the current instance and the parameters
+     * @exception RuntimeException - if the either of the objects are incapable of being moded or if the parameter contains
+     * the integer value 0
+     * @param v the Value object that will be modded to this instance
+     * @return a Value that contains an integer or real
+     */
+    public Value mod (Value v) {
+        if (v.isInt() && v.asInt() == 0)
+            throw new RuntimeException("Error: Division by zero occurred.");
+
+        if (this.isInt() && v.isInt()) {
+            return Value.of(this.asReal() % v.asReal());
+        }
+
+        throw new RuntimeException("Error: Operator is not overloaded: " + this.getType() + " + " + v.getType());
+    }
+
+    /**
+     * Performs logical AND between the current instance and the parameter
+     * @exception RuntimeException - if the either of the objects are incapable of being anded
+     * @param v - the Value object that will be anded to this instance
+     * @return a Value that contains a boolean
+     */
+    public Value and (Value v) {
+        if (this.isBool() && v.isBool()) {
+            return Value.of(this.asBool() && v.asBool());
+        }
+
+        throw new RuntimeException("Error: Operator is not overloaded: " + this.getType() + " + " + v.getType());
+    }
+
+    /**
+     * Creates and returns new instance of the Value from the parameter
+     * @param v - the Value object to copy
+     * @return a new Value object with the same attribute values as the parameter
+     */
+    public static Value copy(Value v) {
+        return new Value(v);
+    }
+
+    // Getters and Setters
     public Type getType() {
         return type;
     }
 
-    /**
-     * Sets the type of this object, see {@link Value.Type}
-     * @param type - the Value type
-     */
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public int getStartIDX() {
+        return startIDX;
+    }
+
+    public void setStartIDX(int startIDX) {
+        this.startIDX = startIDX;
+    }
+
+    public int getEndIDX() {
+        return endIDX;
+    }
+
+    public void setEndIDX(int endIDX) {
+        this.endIDX = endIDX;
     }
 
     @Override

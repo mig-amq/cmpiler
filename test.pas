@@ -1,11 +1,13 @@
 program test;
 var
-  a : array [1..3] of integer;
-function func_name (a, b, c : integer) : integer;
-begin
-  writeln('hello');
-end;
+  a, sum : integer;
+  b : array[1..5] of integer;
 
 BEGIN
-  a := 12;
+  sum := 0;
+  for a := 1 to 5 do
+    begin
+      b[a] := a;
+
+    end;
 END.

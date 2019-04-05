@@ -178,29 +178,15 @@ public interface PascaletListener extends ParseTreeListener {
 	 */
 	void exitVarDef(PascaletParser.VarDefContext ctx);
 	/**
-	 * Enter a parse tree produced by the {@code regularVar}
-	 * labeled alternative in {@link PascaletParser#variable}.
+	 * Enter a parse tree produced by {@link PascaletParser#variable}.
 	 * @param ctx the parse tree
 	 */
-	void enterRegularVar(PascaletParser.RegularVarContext ctx);
+	void enterVariable(PascaletParser.VariableContext ctx);
 	/**
-	 * Exit a parse tree produced by the {@code regularVar}
-	 * labeled alternative in {@link PascaletParser#variable}.
+	 * Exit a parse tree produced by {@link PascaletParser#variable}.
 	 * @param ctx the parse tree
 	 */
-	void exitRegularVar(PascaletParser.RegularVarContext ctx);
-	/**
-	 * Enter a parse tree produced by the {@code arrayVar}
-	 * labeled alternative in {@link PascaletParser#variable}.
-	 * @param ctx the parse tree
-	 */
-	void enterArrayVar(PascaletParser.ArrayVarContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code arrayVar}
-	 * labeled alternative in {@link PascaletParser#variable}.
-	 * @param ctx the parse tree
-	 */
-	void exitArrayVar(PascaletParser.ArrayVarContext ctx);
+	void exitVariable(PascaletParser.VariableContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PascaletParser#constDefBlock}.
 	 * @param ctx the parse tree
@@ -251,6 +237,16 @@ public interface PascaletListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitProcedureDeclaration(PascaletParser.ProcedureDeclarationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascaletParser#procedureStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterProcedureStatement(PascaletParser.ProcedureStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascaletParser#procedureStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitProcedureStatement(PascaletParser.ProcedureStatementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PascaletParser#formalParameterList}.
 	 * @param ctx the parse tree

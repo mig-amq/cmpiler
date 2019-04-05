@@ -113,19 +113,11 @@ public interface PascaletVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitVarDef(PascaletParser.VarDefContext ctx);
 	/**
-	 * Visit a parse tree produced by the {@code regularVar}
-	 * labeled alternative in {@link PascaletParser#variable}.
+	 * Visit a parse tree produced by {@link PascaletParser#variable}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitRegularVar(PascaletParser.RegularVarContext ctx);
-	/**
-	 * Visit a parse tree produced by the {@code arrayVar}
-	 * labeled alternative in {@link PascaletParser#variable}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitArrayVar(PascaletParser.ArrayVarContext ctx);
+	T visitVariable(PascaletParser.VariableContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PascaletParser#constDefBlock}.
 	 * @param ctx the parse tree
@@ -156,6 +148,12 @@ public interface PascaletVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitProcedureDeclaration(PascaletParser.ProcedureDeclarationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascaletParser#procedureStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProcedureStatement(PascaletParser.ProcedureStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PascaletParser#formalParameterList}.
 	 * @param ctx the parse tree

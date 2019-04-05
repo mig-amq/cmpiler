@@ -10,7 +10,9 @@ block
 
 simpleStatement
     :   assignmentStatement
+    |   procedureStatement
     |   builtInFuncStatement
+    |   functionDesignator
     |   emptyStatement
     ;
 
@@ -77,8 +79,8 @@ varDef
     ;
 
 variable
-    :   IDENT #regularVar
-    |   IDENT LBRACK constant RBRACK #arrayVar
+    :   IDENT
+    |   IDENT LBRACK constant RBRACK
     ;
 
 constDefBlock
@@ -102,6 +104,10 @@ procedureDeclaration
     :   PROCEDURE variable (formalParameterList)? SEMI block
     ;
 
+procedureStatement
+    :   variable (LPAREN parameterList RPAREN)?
+    ;
+
 formalParameterList
     :   LPAREN parameterGroup (SEMI parameterGroup)* RPAREN
     ;
@@ -123,7 +129,7 @@ arrayType
     ;
 
 type
-    :   (CHARACTER | BOOLEAN | INTEGER | STRING | REAL)
+    :   (DOUBLE | CHARACTER | BOOLEAN | INTEGER | STRING)
     |   arrayType
     ;
 
@@ -211,12 +217,16 @@ constant
 
 unsignedNumber
     :   INT
-    |   REAL_NUM
+    |   RNUM
     ;
+
 identifier
     :   IDENT
     ;
 //    Lexical rules
+DOUBLE
+    :   R E A L
+    ;
 WRITELN
     :   W R I T E L N
     ;
@@ -320,10 +330,7 @@ INT
 STR
     :   '\''.*?'\''
     ;
-REAL
-    :   R E A L
-    ;
-REAL_NUM
+RNUM
     :   ('0' .. '9') + (('.' ('0' .. '9') + (EXPONENT)?)? | EXPONENT)
     ;
 EQUAL
