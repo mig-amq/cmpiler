@@ -1,19 +1,16 @@
 package com.cmpiler.Visitors;
 
-import com.cmpiler.Scope.Function;
-import com.cmpiler.Scope.Procedure;
-import com.cmpiler.Scope.Scope;
-import com.cmpiler.Scope.Value;
+import com.cmpiler.Scope.*;
 import com.cmpiler.grammar.PascaletBaseVisitor;
 import com.cmpiler.grammar.PascaletParser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("Duplicates")
 public class SuperVisitor extends PascaletBaseVisitor<Value> {
     protected Scope scope;
 
@@ -23,7 +20,7 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
 
     @Override
     public Value visitProgram(PascaletParser.ProgramContext ctx) {
-        visit(ctx.block());
+        visitBlockCustom(ctx.block());
         return Value.NULL;
     }
 
@@ -32,12 +29,65 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
         for (PascaletParser.VarDefBlockContext vdfb : ctx.varDefBlock())
             visitVarDefBlock(vdfb);
 
+        for (PascaletParser.ConstDefBlockContext cdbc : ctx.constDefBlock())
+            visit(cdbc);
+
         return visit(ctx.compoundStatement());
     }
 
     @Override
+    public Value visitConstDefBlock(PascaletParser.ConstDefBlockContext ctx) {
+
+        for (PascaletParser.ConstDefContext ct : ctx.constDef())
+            visit(ct);
+
+        return Value.NULL;
+    }
+
+    @Override
+    public Value visitConstDef(PascaletParser.ConstDefContext ctx) {
+        Value v = visitConstant(ctx.constant());
+        String varName = visitVariable(ctx.variable()).toString();
+        v.setConstant(true);
+
+        if (varName.contains("[") || varName.contains("]"))
+            throw new RuntimeException(" Fatal: Syntax error, \"=\" expected but \"[\" or \"]\" found");
+
+        this.scope.getVariables().put(varName, v);
+        return Value.NULL;
+    }
+
+    private Value visitBlockCustom(PascaletParser.BlockContext ctx) {
+        for (PascaletParser.ConstDefBlockContext cdbc : ctx.constDefBlock())
+            visit(cdbc);
+
+        for (PascaletParser.VarDefBlockContext vdfb : ctx.varDefBlock())
+            visitVarDefBlock(vdfb);
+
+        return visitCompoundStatementCustom(ctx.compoundStatement());
+    }
+
+    @Override
     public Value visitCompoundStatement(PascaletParser.CompoundStatementContext ctx) {
-        return visit(ctx.statements());
+        return super.visitCompoundStatement(ctx);
+    }
+
+    public Value visitCompoundStatementCustom(PascaletParser.CompoundStatementContext ctx) {
+        return visitStatementsCustom(ctx.statements());
+    }
+
+    public Value visitStatementsCustom(PascaletParser.StatementsContext ctx) {
+        Scanner in = new Scanner(System.in);
+        for (PascaletParser.StatementContext statement : ctx.statement()) {
+            in.nextLine();
+            try {
+                visitStatement(statement);
+            } catch (Exception e) {
+                System.out.println("\u001B[31m" + e.getMessage() + "\u001B[0m");
+            }
+        }
+
+        return Value.NULL;
     }
 
     @Override
@@ -63,26 +113,30 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
             return visitBuiltInFuncStatement(ctx.builtInFuncStatement());
         else if (ctx.functionDesignator() != null)
             return visit(ctx.functionDesignator());
+        else if (ctx.mathFuncStatement() != null)
+            return visit(ctx.mathFuncStatement());
+        else if (ctx.ordFuncStatement() != null)
+            return visit(ctx.ordFuncStatement());
 
         return Value.NULL;
     }
 
     @Override
     public Value visitBuiltInFuncStatement(PascaletParser.BuiltInFuncStatementContext ctx) {
-        if (ctx.expression() != null)
-            if (ctx.WRITELN() != null)
-                System.out.println(visit(ctx.expression()).toString());
-            else System.out.print(visit(ctx.expression()).toString());
-        else if (ctx.unsignedConstant() != null)
-            if (ctx.WRITELN() != null)
-                System.out.println(visit(ctx.unsignedConstant()).toString());
-            else System.out.print(visit(ctx.unsignedConstant()).toString());
-        else if (ctx.variable() != null)
+        if (ctx.expression() != null) {
+            if (ctx.WRITELN() != null) System.out.println(visit(ctx.expression()).toString());
+            else if (ctx.WRITE() != null) System.out.print(visit(ctx.expression()).toString());
+        }
+        else if (ctx.unsignedConstant() != null) {
+            if (ctx.WRITELN() != null) System.out.println(visit(ctx.unsignedConstant()).toString());
+            else if (ctx.WRITE() != null) System.out.print(visit(ctx.unsignedConstant()).toString());
+        }
+        else if (ctx.variable() != null) {
             if (ctx.WRITELN() != null)
                 System.out.println(getVariableValue(ctx.variable()).toString());
             else if (ctx.WRITE() != null)
                 System.out.print(getVariableValue(ctx.variable()).toString());
-            else {
+            else if (ctx.READLN() != null) {
                 Scanner sc = new Scanner(System.in);
                 String scanned = sc.nextLine();
 
@@ -93,10 +147,72 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
                         throw new RuntimeException("Error: Type Mismatch");
                     }
                 else
-                scope.assignValue(ctx.variable().IDENT().toString(), scanned);
+                    scope.assignValue(ctx.variable().IDENT().toString(), scanned);
             }
+        }
 
         return Value.NULL;
+    }
+
+    @Override
+    public Value visitMathFuncStatement(PascaletParser.MathFuncStatementContext ctx) {
+        Value val;
+        if (ctx.expression() != null)
+            val = visit(ctx.expression());
+        else if (ctx.unsignedConstant() != null)
+            val = visit(ctx.unsignedConstant());
+        else
+            val = getVariableValue(ctx.variable());
+
+        if (ctx.ABS() != null)
+            return Value.abs(val);
+        else if (ctx.ARCTAN() != null)
+            return Value.arctan(val);
+        else if (ctx.COS() != null)
+            return Value.cos(val);
+        else if (ctx.EXP() != null)
+            return Value.exp(val);
+        else if (ctx.LN() != null)
+            return Value.ln(val);
+        else if (ctx.ROUND() != null)
+            return Value.round(val);
+        else if (ctx.SIN() != null)
+            return Value.sin(val);
+        else if (ctx.SQR() != null)
+            return Value.sqr(val);
+        else if (ctx.TRUNC() != null)
+            return Value.trunc(val);
+        else if (ctx.INC() != null && ctx.variable() != null) {
+            val.setValue(val.asInt() + 1);
+            return val;
+        }
+        else if (ctx.variable() != null) {
+            val.setValue(val.asInt() - 1);
+            return val;
+        }
+
+        return Value.NULL;
+    }
+
+    @Override
+    public Value visitOrdFuncStatement(PascaletParser.OrdFuncStatementContext ctx) {
+        Value val;
+        if (ctx.expression() != null)
+            val = visit(ctx.expression());
+        else if (ctx.unsignedConstant() != null)
+            val = visit(ctx.unsignedConstant());
+        else
+            val = getVariableValue(ctx.variable());
+
+        if (ctx.CHR() != null)
+            return Value.chr(val);
+        else if (ctx.ORD() != null)
+            return Value.ord(val);
+        else if (ctx.PRED() != null)
+            return Value.pred(val);
+        else
+            return Value.succ(val);
+
     }
 
     @Override
@@ -107,6 +223,10 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
             visitIfStatement(ctx.ifStatement());
         else if (ctx.forStatement() != null)
             visitForStatement(ctx.forStatement());
+        else if (ctx.whileStatement() != null)
+            visitWhileStatement(ctx.whileStatement());
+        else if (ctx.repeatStatement() != null)
+            visitRepeatStatement(ctx.repeatStatement());
 
         return Value.NULL;
     }
@@ -161,40 +281,29 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
     }
 
     @Override
+    public Value visitWhileStatement(PascaletParser.WhileStatementContext ctx) {
+        while (visit(ctx.expression()).asBool()) {
+            visit(ctx.statement());
+        }
+
+        return Value.NULL;
+    }
+
+    @Override
+    public Value visitRepeatStatement(PascaletParser.RepeatStatementContext ctx) {
+        do {
+            visit(ctx.statements());
+        } while (!visit(ctx.expression()).asBool());
+
+        return Value.NULL;
+    }
+
+    @Override
     public Value visitVarDefBlock(PascaletParser.VarDefBlockContext ctx) {
         for (PascaletParser.VarDefContext vdctxt : ctx.varDef())
             scope.getVariables().putAll(getVariables(vdctxt));
 
         return Value.NULL;
-    }
-
-    public HashMap<String, Value> getVariables(PascaletParser.VarDefContext ctx) {
-        HashMap<String, Value> map = new HashMap<>();
-
-        for (PascaletParser.IdentifierContext idc : ctx.identifier()) {
-            if (ctx.type().BOOLEAN() != null) { // if var is boolean
-                map.put(getIdentifierName(idc), new Value(Value.Type.BOOL));
-            } else if (ctx.type().DOUBLE() != null) { // if var is double
-                map.put(getIdentifierName(idc), new Value(Value.Type.REAL));
-            } else if (ctx.type().INTEGER() != null) { // if var is int
-                map.put(getIdentifierName(idc), new Value(Value.Type.INT));
-            } else if (ctx.type().STRING() != null) { // if var is string
-                map.put(getIdentifierName(idc), new Value(Value.Type.STRING));
-            } else if (ctx.type().CHARACTER() != null) { // if var is char
-                map.put(getIdentifierName(idc), new Value(Value.Type.CHAR));
-            } else if (ctx.type().arrayType() != null) {
-                map.put(getIdentifierName(idc), getArrayValue(ctx.type().arrayType()));
-            }
-        }
-
-        return map;
-    }
-
-    public Value getArrayValue(PascaletParser.ArrayTypeContext ctx) {
-        Value val = new Value(Value.Type.ARRAY);
-
-        val.setValue(new ArrayList<>(), visitConstant(ctx.constant(0)).asInt(), visitConstant(ctx.constant(1)).asInt());
-        return val;
     }
 
     @Override
@@ -223,7 +332,10 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
             }
 
             return val;
-        }
+        } else if (ctx.STR() != null)
+            return Value.of(ctx.STR().toString().substring(1, ctx.STR().toString().length() - 1));
+        else if (ctx.CHAR() != null)
+            return Value.of(ctx.CHAR().toString().substring(1, ctx.CHAR().toString().length() - 1).charAt(0));
 
         return Value.NULL;
     }
@@ -260,9 +372,21 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
         Map.Entry<String, Value> var = scope.findVariable(variable);
         Value expression = visitExpression(ctx.expression());
 
-        if (index != -1 && expression.isInt())
-            scope.assignValue(variable, index, expression.asInt());
-        else if (index != -1)
+        if (var.getValue().isConstant())
+            throw new RuntimeException("Error: Cannot change a constant.");
+
+        if (index != -1)
+            if (expression.isInt())
+                scope.assignValue(variable, index, expression.asInt());
+            else if (expression.isChar())
+                scope.assignValue(variable, index, expression.asChar());
+            else if (expression.isString())
+                scope.assignValue(variable, index, expression.asString());
+            else if (expression.isReal())
+                scope.assignValue(variable, index, expression.asReal());
+            else if (expression.isBool())
+                scope.assignValue(variable, index, expression.asBool());
+        else
             throw new RuntimeException("Error: Type mismatch");
 
         if (index == -1)
@@ -297,6 +421,8 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
                         visitSimpleExpression(ctx.simpleExpression()).compare(visitExpression(ctx.expression())) > 0);
             } else if (ctx.relationaloperator().EQUAL() != null) { // equal
                 return Value.of(visitSimpleExpression(ctx.simpleExpression()).compare(visitExpression(ctx.expression())) == 0);
+            } else if (ctx.relationaloperator().NOT_EQUAL() != null) {
+                return Value.of(visitSimpleExpression(ctx.simpleExpression()).compare(visitExpression(ctx.expression())) != 0);
             }
         }
 
@@ -324,11 +450,13 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
             if (ctx.multiplicativeoperator().STAR() != null) {
                 return visitSignedFactor(ctx.signedFactor()).mult(visitTerm(ctx.term()));
             } else if (ctx.multiplicativeoperator().DIV() != null) {
-                return visitSignedFactor(ctx.signedFactor()).div(visitTerm(ctx.term()));
+                return Value.of(visitSignedFactor(ctx.signedFactor()).div(visitTerm(ctx.term())).asInt());
             } else if (ctx.multiplicativeoperator().MOD() != null) {
                 return visitSignedFactor(ctx.signedFactor()).mod(visitTerm(ctx.term()));
             } else if (ctx.multiplicativeoperator().AND() != null) {
                 return visitSignedFactor(ctx.signedFactor()).and(visitTerm(ctx.term()));
+            } else if (ctx.multiplicativeoperator().SLASH() != null) {
+                return visitSignedFactor(ctx.signedFactor()).div(visitTerm(ctx.term()));
             }
         }
 
@@ -357,6 +485,10 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
             return visitFunctionDesignator(ctx.functionDesignator());
         else if (ctx.unsignedConstant() != null)
             return visitUnsignedConstant(ctx.unsignedConstant());
+        else if (ctx.mathFuncStatement() != null)
+            return visitMathFuncStatement(ctx.mathFuncStatement());
+        else if (ctx.ordFuncStatement() != null)
+            return visitOrdFuncStatement(ctx.ordFuncStatement());
         else if (ctx.NOT() != null) {
             Value value = visitFactor(ctx.factor());
             if (value.isBool())
@@ -374,30 +506,86 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
             return visitUnsignedNumber(ctx.unsignedNumber());
         else if (ctx.STR() != null)
             return Value.of(ctx.STR().toString().substring(1, ctx.STR().toString().length() - 1));
+        else if (ctx.CHAR() != null)
+            return Value.of(ctx.CHAR().toString().substring(1, ctx.CHAR().toString().length() - 1).charAt(0));
 
         return Value.NULL;
     }
 
     @Override
     public Value visitFunctionDesignator(PascaletParser.FunctionDesignatorContext ctx) {
-        Function function = scope.findFunction(visit(ctx.variable()).toString()).getValue();
-        ArrayList<Value> parameterValues = getParameterValues(ctx.parameterList());
+        Map.Entry<String, Function> function = scope.findFunction(visit(ctx.variable()).toString());
+        Map.Entry<String, Procedure> procedure = scope.findProcedure(visit(ctx.variable()).toString());
+        ArrayList<Value> parameterValues = new ArrayList<>();
 
-        return function.invoke(parameterValues);
+        if (ctx.parameterList() != null)
+            parameterValues.addAll(getParameterValues(ctx.parameterList()));
+
+        if (function == null && procedure == null) {
+            throw new RuntimeException("Error: Identifier not found \"" + visit(ctx.variable()).toString() + "\"");
+        }
+
+        return function.getValue().invoke(parameterValues);
     }
 
     @Override
     public Value visitProcedureStatement(PascaletParser.ProcedureStatementContext ctx) {
-        Procedure procedure = scope.findProcedure(visit(ctx.variable()).toString()).getValue();
-        ArrayList<Value> parameterValues = getParameterValues(ctx.parameterList());
+        Map.Entry<String, Function> function = scope.findFunction(visit(ctx.variable()).toString());
+        Map.Entry<String, Procedure> procedure = scope.findProcedure(visit(ctx.variable()).toString());
+        ArrayList<Value> parameterValues = new ArrayList<>();
 
-        procedure.invoke(parameterValues);
+        if (ctx.parameterList() != null)
+            parameterValues.addAll(getParameterValues(ctx.parameterList()));
+
+        if (function == null && procedure == null) {
+            throw new RuntimeException("Error: Identifier not found \"" + visit(ctx.variable()).toString() + "\"");
+        }
+
+        procedure.getValue().invoke(parameterValues);
         return Value.NULL;
     }
 
     @Override
     public Value visitActualParameter(PascaletParser.ActualParameterContext ctx) {
         return visitExpression(ctx.expression());
+    }
+
+    public CustomMap<String, Value> getVariables(PascaletParser.VarDefContext ctx) {
+        CustomMap<String, Value> map = new CustomMap<>();
+
+        for (PascaletParser.IdentifierContext idc : ctx.identifier()) {
+            if (ctx.type().BOOLEAN() != null) { // if var is boolean
+                map.put(getIdentifierName(idc), new Value(Value.Type.BOOL));
+            } else if (ctx.type().DOUBLE() != null) { // if var is double
+                map.put(getIdentifierName(idc), new Value(Value.Type.REAL));
+            } else if (ctx.type().INTEGER() != null) { // if var is int
+                map.put(getIdentifierName(idc), new Value(Value.Type.INT));
+            } else if (ctx.type().STRING() != null) { // if var is string
+                map.put(getIdentifierName(idc), new Value(Value.Type.STRING));
+            } else if (ctx.type().CHARACTER() != null) { // if var is char
+                map.put(getIdentifierName(idc), new Value(Value.Type.CHAR));
+            } else if (ctx.type().arrayType() != null) {
+                map.put(getIdentifierName(idc), getArrayValue(ctx.type().arrayType()));
+            }
+        }
+
+        return map;
+    }
+
+    public Value getArrayValue(PascaletParser.ArrayTypeContext ctx) {
+        Value val = new Value(Value.Type.ARRAY);
+        Value.Type type = Value.Type.INT;
+        if (ctx.type().DOUBLE() != null)
+            type = Value.Type.REAL;
+        else if (ctx.type().BOOLEAN() != null)
+            type = Value.Type.BOOL;
+        else if (ctx.type().STRING() != null)
+            type = Value.Type.STRING;
+        else if (ctx.type().CHARACTER() != null)
+            type = Value.Type.CHAR;
+
+        val.setValue(new ArrayList<>(), type, visitConstant(ctx.constant(0)).asInt(), visitConstant(ctx.constant(1)).asInt());
+        return val;
     }
 
     public ArrayList<Value> getParameterValues(PascaletParser.ParameterListContext ctx) {
@@ -416,9 +604,9 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
 
             if (val.getType() == Value.Type.ARRAY)
                 if (index.asInt() >= val.getStartIDX() && index.asInt() <= val.getEndIDX())
-                    return Value.of(val.asArray().get(index.asInt() - 1).asInt());
-            else
-                throw new RuntimeException("Error: '" + ctx.IDENT().toString() + "' is not an array");
+                    return val.asArray().get(index.asInt() - 1);
+                else
+                    throw new RuntimeException("Error: '" + ctx.IDENT().toString() + "' is not an array");
         }
 
         return val;
@@ -427,4 +615,5 @@ public class SuperVisitor extends PascaletBaseVisitor<Value> {
     public String getIdentifierName(PascaletParser.IdentifierContext ctx) {
         return ctx.IDENT().toString();
     }
+
 }

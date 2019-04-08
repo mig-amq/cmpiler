@@ -1,0 +1,10 @@
+Bonus Features:
+	Identifiers are not limited by name length
+	For loop (Downto)
+	While..Do loop
+	Repeat..Until loop
+	Nested subroutines
+	Recursive calls
+	String, Character, Boolean, Real/Double Arrays
+	Standard functions:
+		abs, arctan, cos, exp, ln, round, sin, sqr, sqrt, trunc, chr, ord, pred, succ, inc, dec

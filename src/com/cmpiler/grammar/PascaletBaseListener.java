@@ -64,6 +64,30 @@ public class PascaletBaseListener implements PascaletListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterMathFuncStatement(PascaletParser.MathFuncStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitMathFuncStatement(PascaletParser.MathFuncStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterOrdFuncStatement(PascaletParser.OrdFuncStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitOrdFuncStatement(PascaletParser.OrdFuncStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterStructuredStatement(PascaletParser.StructuredStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -95,6 +119,30 @@ public class PascaletBaseListener implements PascaletListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitForStatement(PascaletParser.ForStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterWhileStatement(PascaletParser.WhileStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhileStatement(PascaletParser.WhileStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterRepeatStatement(PascaletParser.RepeatStatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitRepeatStatement(PascaletParser.RepeatStatementContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

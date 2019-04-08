@@ -1,25 +1,31 @@
 package com.cmpiler.Scope;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Scope {
-    private HashMap<String, Value> variables;
-    private HashMap<String, Function> functions;
-    private HashMap<String, Procedure> procedures;
+    public static final String[] keywords = new String[]{
+        "absolute" , "and" , "array" , "asm" , "begin" , "case" , "const" ,
+            "constructor" , "destructor" , "div" , "do" , "downto" , "else" ,
+            "end" , "file" , "for" , "function" , "goto" , "if" , "implementation" , "in" ,
+            "inherited" , "inline" , "interface" , "label" , "mod" , "nil" , "not" , "object" ,
+            "of" , "operator" , "or" , "packed" , "procedure" , "program" , "record" , "reintroduce" ,
+            "repeat" , "self" , "set" , "shl" , "shr" , "string" , "then" , "to" , "type" , "unit" , "until" ,
+            "uses" , "var" , "while" , "with" , "xor"};
+
+    private CustomMap<String, Value> variables;
+    private CustomMap<String, Function> functions;
+    private CustomMap<String, Procedure> procedures;
 
     private Scope parent;
 
     /**
-     * Scope constructor, initializes {@link HashMap HashMaps} and assigns a parent to null,
+     * Scope constructor, initializes {@link CustomMap CustomMaps} and assigns a parent to null,
      * if a {@link Scope Scopes} parent is null, it essentially means it is the global Scope
      */
     public Scope() {
-        this.variables = new HashMap<>();
-        this.functions = new HashMap<>();
-        this.procedures = new HashMap<>();
+        this.variables = new CustomMap<>();
+        this.functions = new CustomMap<>();
+        this.procedures = new CustomMap<>();
 
         this.parent = null;
     }
@@ -33,6 +39,14 @@ public class Scope {
         this.parent = parent;
     }
 
+    public static Scope copy(Scope c) {
+        Scope s = new Scope(c.parent);
+        s.getVariables().putAll(c.getVariables());
+        s.getFunctions().putAll(c.getFunctions());
+        s.getProcedures().putAll(c.getProcedures());
+
+        return s;
+    }
 
     /**
      * Assigns a value to a variable in the Scope or its parents,
@@ -90,11 +104,31 @@ public class Scope {
     }
 
     public void assignValue (String variable, int index, int x) {
+        this.assignValue(variable, index, Value.of(x));
+    }
+
+    public void assignValue (String variable, int index, String x) {
+        this.assignValue(variable, index, Value.of(x));
+    }
+
+    public void assignValue (String variable, int index, char x) {
+        this.assignValue(variable, index, Value.of(x));
+    }
+
+    public void assignValue (String variable, int index, boolean x) {
+        this.assignValue(variable, index, Value.of(x));
+    }
+
+    public void assignValue (String variable, int index, double x) {
+        this.assignValue(variable, index, Value.of(x));
+    }
+
+    public void assignValue (String variable, int index, Value x) {
         Map.Entry<String, Value> var = findVariable(variable);
         if (var != null) {
-            if (var.getValue().getType() == Value.Type.ARRAY)
+            if (var.getValue().getType() == Value.Type.ARRAY && var.getValue().asArray().get(0).getType() == x.getType())
                 if (index >= var.getValue().getStartIDX() && index <= var.getValue().getEndIDX())
-                    var.getValue().asArray().set(index - 1, Value.of(x));
+                    var.getValue().asArray().set(index - 1, x);
                 else
                     throw new RuntimeException("Error: Index out of bounds");
             else
@@ -103,6 +137,7 @@ public class Scope {
             throw new RuntimeException("Error: Variable was not declared");
         }
     }
+
     /**
      * Similar to {@link #assignValue(String, String)}, except for booleans
      * @param variable - String, the variable name
@@ -206,27 +241,27 @@ public class Scope {
     }
 
     // Getters and Setters
-    public HashMap<String, Value> getVariables() {
+    public CustomMap<String, Value> getVariables() {
         return variables;
     }
 
-    public void setVariables(HashMap<String, Value> variables) {
+    public void setVariables(CustomMap<String, Value> variables) {
         this.variables = variables;
     }
 
-    public HashMap<String, Function> getFunctions() {
+    public CustomMap<String, Function> getFunctions() {
         return functions;
     }
 
-    public void setFunctions(HashMap<String, Function> functions) {
+    public void setFunctions(CustomMap<String, Function> functions) {
         this.functions = functions;
     }
 
-    public HashMap<String, Procedure> getProcedures() {
+    public CustomMap<String, Procedure> getProcedures() {
         return procedures;
     }
 
-    public void setProcedures(HashMap<String, Procedure> procedures) {
+    public void setProcedures(CustomMap<String, Procedure> procedures) {
         this.procedures = procedures;
     }
 

@@ -35,6 +35,18 @@ public interface PascaletVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBuiltInFuncStatement(PascaletParser.BuiltInFuncStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PascaletParser#mathFuncStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMathFuncStatement(PascaletParser.MathFuncStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascaletParser#ordFuncStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOrdFuncStatement(PascaletParser.OrdFuncStatementContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PascaletParser#structuredStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -52,6 +64,18 @@ public interface PascaletVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitForStatement(PascaletParser.ForStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascaletParser#whileStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWhileStatement(PascaletParser.WhileStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascaletParser#repeatStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRepeatStatement(PascaletParser.RepeatStatementContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PascaletParser#forList}.
 	 * @param ctx the parse tree

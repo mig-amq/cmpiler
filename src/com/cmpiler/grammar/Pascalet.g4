@@ -14,18 +14,44 @@ simpleStatement
     |   builtInFuncStatement
     |   functionDesignator
     |   emptyStatement
+    |   mathFuncStatement
+    |   ordFuncStatement
     ;
 
 builtInFuncStatement
-    :   WRITELN LPAREN (unsignedConstant|expression|variable) RPAREN
-    |   WRITE LPAREN (unsignedConstant|expression|variable) RPAREN
+    :   WRITELN LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   WRITE LPAREN (variable|unsignedConstant|expression) RPAREN
     |   READLN LPAREN variable RPAREN
+    ;
+
+mathFuncStatement
+    :   ABS LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   INC LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   DEC LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   ARCTAN LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   COS LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   LN LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   ROUND LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   SIN LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   SQR LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   SQRT LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   TRUNC LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   EXP LPAREN (variable|unsignedConstant|expression) RPAREN
+    ;
+
+ordFuncStatement
+    :   CHR LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   ORD LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   PRED LPAREN (variable|unsignedConstant|expression) RPAREN
+    |   SUCC LPAREN (variable|unsignedConstant|expression) RPAREN
     ;
 
 structuredStatement
     :    compoundStatement
     |    ifStatement
     |    forStatement
+    |    whileStatement
+    |    repeatStatement
     ;
 
 ifStatement
@@ -35,6 +61,14 @@ ifStatement
 forStatement
     :   FOR variable ASSIGN forList DO statement
     ;
+
+whileStatement
+   :    WHILE expression DO statement
+   ;
+
+repeatStatement
+  :     REPEAT statements UNTIL expression
+  ;
 
 forList
     :   initialValue op=(TO | DOWNTO) finalValue
@@ -183,10 +217,13 @@ factor
     |   unsignedConstant
     |   NOT factor
     |   BOOL
+    |   mathFuncStatement
+    |   ordFuncStatement
     ;
 
 unsignedConstant
     :   unsignedNumber
+    |   CHAR
     |   STR
     |   NIL
     ;
@@ -213,6 +250,7 @@ constant
     |    variable
     |    op=(PLUS|MINUS) variable
     |    STR
+    |    CHAR
     ;
 
 unsignedNumber
@@ -224,6 +262,54 @@ identifier
     :   IDENT
     ;
 //    Lexical rules
+INC
+    :   I N C
+    ;
+DEC
+    :   D E C
+    ;
+ABS
+    :  A B S
+    ;
+CHR
+    :   C H R
+    ;
+ARCTAN
+    :   A R C T A N
+    ;
+COS
+    :   C O S
+    ;
+LN
+    :   L N
+    ;
+ROUND
+    :   R O U N D
+    ;
+SIN
+    :   S I N
+    ;
+SQR
+    :   S Q R
+    ;
+SQRT
+    :   S Q R T
+    ;
+TRUNC
+    :   T R U N C
+    ;
+EXP
+    :   E X P
+    ;
+ORD
+    :   O R D
+    ;
+PRED
+    :   P R E D
+    ;
+SUCC
+    :   S U C C
+    ;
 DOUBLE
     :   R E A L
     ;
@@ -268,6 +354,15 @@ TO
     ;
 FOR
     :   F O R
+    ;
+WHILE
+    :   W H I L E
+    ;
+REPEAT
+    :   R E P E A T
+    ;
+UNTIL
+    :   U N T I L
     ;
 DOWNTO
     :   D O W N T O
@@ -321,14 +416,14 @@ OR
 IDENT
     :   [a-zA-Z] [a-zA-Z0-9_]*
     ;
+STR
+    :   '\'' ('\'\'' | ~ ('\''))* '\''
+    ;
 CHAR
-    :   '\'' [a-zA-Z0-9] '\''
+    :   '\'' ('\'\'' | ~ ('\'')) '\''
     ;
 INT
     :   [0-9]+
-    ;
-STR
-    :   '\''.*?'\''
     ;
 RNUM
     :   ('0' .. '9') + (('.' ('0' .. '9') + (EXPONENT)?)? | EXPONENT)
@@ -437,6 +532,9 @@ COMMENT_2
     :    '{' .*? '}' -> skip
     ;
 
+COMMENT_3
+    :   '//' .*? -> skip
+    ;
 WS
     :   [ \t\r\n] -> skip
     ;

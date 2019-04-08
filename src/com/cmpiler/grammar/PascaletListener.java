@@ -48,6 +48,26 @@ public interface PascaletListener extends ParseTreeListener {
 	 */
 	void exitBuiltInFuncStatement(PascaletParser.BuiltInFuncStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link PascaletParser#mathFuncStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterMathFuncStatement(PascaletParser.MathFuncStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascaletParser#mathFuncStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitMathFuncStatement(PascaletParser.MathFuncStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascaletParser#ordFuncStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterOrdFuncStatement(PascaletParser.OrdFuncStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascaletParser#ordFuncStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitOrdFuncStatement(PascaletParser.OrdFuncStatementContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link PascaletParser#structuredStatement}.
 	 * @param ctx the parse tree
 	 */
@@ -77,6 +97,26 @@ public interface PascaletListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitForStatement(PascaletParser.ForStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascaletParser#whileStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhileStatement(PascaletParser.WhileStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascaletParser#whileStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhileStatement(PascaletParser.WhileStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascaletParser#repeatStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterRepeatStatement(PascaletParser.RepeatStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascaletParser#repeatStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitRepeatStatement(PascaletParser.RepeatStatementContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PascaletParser#forList}.
 	 * @param ctx the parse tree

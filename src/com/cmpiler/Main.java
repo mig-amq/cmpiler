@@ -1,6 +1,8 @@
 package com.cmpiler;
 
 import com.cmpiler.Scope.Scope;
+import com.cmpiler.Visitors.FunctionVisitor;
+import com.cmpiler.Visitors.ProcedureVisitor;
 import com.cmpiler.Visitors.SuperVisitor;
 import com.cmpiler.grammar.*;
 import org.antlr.v4.gui.TreeViewer;
@@ -35,6 +37,12 @@ public class Main {
             walker.walk(new PascaletBaseListener(), tree);
 
             Scope global = new Scope();
+            FunctionVisitor functionVisitor = new FunctionVisitor(global);
+            functionVisitor.visit(tree);
+
+            ProcedureVisitor procVisitor = new ProcedureVisitor(global);
+            procVisitor.visit(tree);
+
             SuperVisitor visitor = new SuperVisitor(global);
             visitor.visitProgram(tree);
 

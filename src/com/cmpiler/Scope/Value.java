@@ -3,7 +3,6 @@ package com.cmpiler.Scope;
 import java.util.ArrayList;
 
 public class Value {
-
     public enum Type {
         INT, REAL, STRING, BOOL, NULL, CHAR, ARRAY
     }
@@ -14,6 +13,7 @@ public class Value {
     public char valChar = '\0';
     public double valDouble = 0.0;
     public boolean valBool = false;
+    public boolean constant = false;
     public ArrayList<Value> valArray = new ArrayList<>();
     public int startIDX = 0, endIDX = 0;
     private Type type = Type.NULL;
@@ -42,7 +42,7 @@ public class Value {
                 this.setValue(v.valChar);
                 break;
             case ARRAY:
-                this.setValue(v.valArray, v.startIDX, v.endIDX);
+                this.setValue(v.valArray, v.type, v.startIDX, v.endIDX);
                 break;
             default:
                 this.setType(Type.NULL);
@@ -128,7 +128,7 @@ public class Value {
      * @param x - the array value
      * @return the parameter value
      */
-    public ArrayList<Value> setValue (ArrayList<Value> x, int startIDX, int endIDX) {
+    public ArrayList<Value> setValue (ArrayList<Value> x, Type type, int startIDX, int endIDX) {
         if (startIDX >= 1 && endIDX >= startIDX) {
             this.valArray = x;
             this.type = Type.ARRAY;
@@ -136,7 +136,16 @@ public class Value {
             this.endIDX = endIDX;
 
             for (int i = startIDX; i <= endIDX; i++)
-                this.valArray.add(Value.of(0));
+                if (type == Type.INT)
+                    this.valArray.add(Value.of(0));
+                else if (type == Type.STRING)
+                    this.valArray.add(Value.of(""));
+                else if (type == Type.CHAR)
+                    this.valArray.add(Value.of(' '));
+                else if (type == Type.BOOL)
+                    this.valArray.add(Value.of(false));
+                else if (type == Type.REAL)
+                    this.valArray.add(Value.of(0.0));
 
             return this.valArray;
         }
@@ -207,7 +216,7 @@ public class Value {
      */
     public static Value of (ArrayList<Value> val, int startIDX, int endIDX) {
         Value v = new Value(Type.BOOL);
-        v.setValue(val, startIDX, endIDX);
+        v.setValue(val, val.get(0).type, startIDX, endIDX);
         return v;
     }
 
@@ -387,14 +396,14 @@ public class Value {
         if (this.isReal() && v.isInt()) {
             return Value.of((this.asReal() + v.asReal()));
         } else if (this.isInt() && v.isReal()) {
-            return Value.of(this.asInt() + this.asReal());
+            return Value.of((double) this.asInt() + v.asReal());
         } else if (this.isReal() && v.isReal()) {
             return Value.of(this.asReal() + v.asReal());
         } else if (this.isInt() && v.isInt()) {
             return Value.of(this.asInt() + v.asInt());
-        } else if (this.isString()) {
+        } else if (this.isString() || this.isChar()) {
             return Value.of(this.asString() + v.toString());
-        } else if (v.isString()) {
+        } else if (v.isString() || v.isChar()) {
             return Value.of(this.toString() + v.asString());
         }
 
@@ -409,13 +418,13 @@ public class Value {
      */
     public Value minus (Value v) {
         if (this.isReal() && v.isInt()) {
-            return Value.of((this.asReal() + v.asReal()));
+            return Value.of((this.asReal() - v.asReal()));
         } else if (this.isInt() && v.isReal()) {
-            return Value.of(this.asInt() + this.asReal());
+            return Value.of(this.asInt() - v.asReal());
         } else if (this.isReal() && v.isReal()) {
-            return Value.of(this.asReal() + v.asReal());
+            return Value.of(this.asReal() - v.asReal());
         } else if (this.isInt() && v.isInt()) {
-            return Value.of(this.asInt() + v.asInt());
+            return Value.of(this.asInt() - v.asInt());
         }
 
         throw new RuntimeException("Error: Operator is not overloaded: " + this.getType() + " + " + v.getType());
@@ -445,7 +454,7 @@ public class Value {
         if (this.isReal() && v.isInt()) {
             return Value.of((this.asReal() * v.asReal()));
         } else if (this.isInt() && v.isReal()) {
-            return Value.of(this.asInt() * this.asReal());
+            return Value.of(this.asInt() * v.asReal());
         } else if (this.isReal() && v.isReal()) {
             return Value.of(this.asReal() * v.asReal());
         } else if (this.isInt() && v.isInt()) {
@@ -469,7 +478,7 @@ public class Value {
         if (this.isReal() && v.isInt()) {
             return Value.of((this.asReal() / v.asReal()));
         } else if (this.isInt() && v.isReal()) {
-            return Value.of(this.asInt() / this.asReal());
+            return Value.of(this.asInt() / v.asReal());
         } else if (this.isReal() && v.isReal()) {
             return Value.of(this.asReal() / v.asReal());
         } else if (this.isInt() && v.isInt()) {
@@ -520,7 +529,152 @@ public class Value {
         return new Value(v);
     }
 
+
+    public static Value abs(Value val) {
+        if (val.isReal())
+            return Value.of(Math.abs(val.asReal()));
+        else if (val.isInt())
+            return Value.of(Math.abs(val.asInt()));
+
+        throw new RuntimeException("Error: Operator is not overloaded: abs(" + val.getType() + ")");
+    }
+
+    public static Value arctan(Value val) {
+        if (val.isReal())
+            return Value.of(Math.atan(val.asReal()));
+        else if (val.isInt())
+            return Value.of(Math.atan(val.asInt()));
+
+        throw new RuntimeException("Error: Operator is not overloaded: arctan(" + val.getType() + ")");
+    }
+
+    public static Value cos(Value val) {
+        if (val.isReal())
+            return Value.of(Math.cos(val.asReal()));
+        else if (val.isInt())
+            return Value.of(Math.cos(val.asInt()));
+
+        throw new RuntimeException("Error: Operator is not overloaded: cos(" + val.getType() + ")");
+    }
+
+    public static Value exp(Value val) {
+        if (val.isReal())
+            return Value.of(Math.exp(val.asReal()));
+        else if (val.isInt())
+            return Value.of(Math.exp(val.asInt()));
+
+        throw new RuntimeException("Error: Operator is not overloaded: exp(" + val.getType() + ")");
+    }
+
+    public static Value ln(Value val) {
+        if (val.isReal())
+            return Value.of(Math.log(val.asReal()));
+        else if (val.isInt())
+            return Value.of(Math.log(val.asInt()));
+
+        throw new RuntimeException("Error: Operator is not overloaded: ln(" + val.getType() + ")");
+    }
+
+    public static Value round(Value val) {
+        if (val.isReal())
+            return Value.of(Math.round(val.asReal()));
+
+        throw new RuntimeException("Error: Operator is not overloaded: round(" + val.getType() + ")");
+    }
+
+    public static Value sin(Value val) {
+        if (val.isReal())
+            return Value.of(Math.sin(val.asReal()));
+        else if (val.isInt())
+            return Value.of(Math.sin(val.asInt()));
+
+        throw new RuntimeException("Error: Operator is not overloaded: sin(" + val.getType() + ")");
+    }
+
+    public static Value sqr(Value val) {
+        if (val.isReal())
+            return Value.of(Math.pow(val.asReal(), 2));
+        else if (val.isInt())
+            return Value.of((int) Math.pow(val.asInt(), 2));
+
+        throw new RuntimeException("Error: Operator is not overloaded: sqr(" + val.getType() + ")");
+    }
+
+    public static Value sqrt(Value val) {
+        if (val.isReal())
+            return Value.of(Math.sqrt(val.asReal()));
+        else if (val.isInt())
+            return Value.of(Math.sqrt(val.asInt()));
+
+        throw new RuntimeException("Error: Operator is not overloaded: sqrt(" + val.getType() + ")");
+    }
+
+    public static Value trunc(Value val) {
+        if (val.isReal())
+            return Value.of((int) val.asReal());
+        else if (val.isInt())
+            return val;
+
+        throw new RuntimeException("Error: Operator is not overloaded: trunc(" + val.getType() + ")");
+    }
+
+    public static Value chr(Value val) {
+        if (val.isInt())
+            return Value.of((char) val.asInt());
+
+        throw new RuntimeException("Error: Operator is not overloaded: chr(" + val.getType() + ")");
+    }
+
+    public static Value ord(Value val) {
+        if (val.isChar())
+            return Value.of((int) val.asChar());
+        else if (val.isInt())
+            return val;
+
+        throw new RuntimeException("Error: Operator is not overloaded: ord(" + val.getType() + ")");
+    }
+
+    public static Value pred(Value val) {
+        if (val.isChar())
+            return Value.of((char) (val.asChar() - 1));
+        else if (val.isInt())
+            return val.minus(Value.of(1));
+
+        throw new RuntimeException("Error: Operator is not overloaded: pred(" + val.getType() + ")");
+    }
+
+    public static Value succ(Value val) {
+        if (val.isChar())
+            return Value.of((char) (val.asChar() + 1));
+        else if (val.isInt())
+            return val.plus(Value.of(1));
+
+        throw new RuntimeException("Error: Operator is not overloaded: succ(" + val.getType() + ")");
+    }
+
+    public void setValue(Value value) {
+        this.name = value.name;
+        this.valInt = value.valInt;
+        this.valString = value.valString;
+        this.valChar = value.valChar;
+        this.valDouble = value.valDouble;
+        this.valBool = value.valBool;
+        this.startIDX = value.startIDX;
+        this.endIDX = value.endIDX;
+        this.valArray = value.valArray;
+        this.type = value.type;
+    }
+
     // Getters and Setters
+
+    public boolean isConstant() {
+        return constant;
+    }
+
+    public void setConstant(boolean constant) {
+        this.constant = constant;
+    }
+
     public Type getType() {
         return type;
     }
